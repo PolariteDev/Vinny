@@ -181,9 +181,9 @@ async def server_view(guild_id):
 			"event_log_channel_id": request.form.get("event_log_channel"),
 			"nonce_filter": int(request.form.get("nonce_filter", 0)),
 			"max_moderations_enabled": int(request.form.get("max_moderations_enabled", 0)),
-			"max_s1_moderations": int(request.form.get("max_s1_moderations", 0)),
-			"max_s2_moderations": int(request.form.get("max_s2_moderations", 0)),
-			"max_s3_moderations": int(request.form.get("max_s3_moderations", 0)),
+			"max_s1_moderations": int(request.form.get("max_s1_moderations", 1)),
+			"max_s2_moderations": int(request.form.get("max_s2_moderations", 4)),
+			"max_s3_moderations": int(request.form.get("max_s3_moderations", 1)),
 			"bot_filter": int(request.form.get("bot_filter", 0)),
 			"on_message_delete": int(request.form.get("on_message_delete", 0)),
 			"on_message_edit": int(request.form.get("on_message_edit", 0)),
@@ -196,7 +196,7 @@ async def server_view(guild_id):
 			"appeals_channel_id": request.form.get("appeals_channel"),
 			"appeals_message": request.form.get("appeals_message"),
 			"appeals_website_message": request.form.get("appeals_website_message"),
-			"appeals_poll": int(request.form.get("appeals_poll", 0))
+			"appeals_poll": int(request.form.get("appeals_poll", 1))
 		}
 		for form in form_fields:
 			if form_fields[form] is None:
