@@ -1,5 +1,5 @@
 # vinny - discord moderation bot
-# Copyright (C) 2024 0vf
+# Copyright (C) 2024-2025 Polarograph
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -85,8 +85,8 @@ def create_guilds_table():
 					max_s2_moderations INTEGER DEFAULT 4,
 					max_s3_moderations INTEGER DEFAULT 1,
 					appeals BOOLEAN DEFAULT 0,
-					appeals_message TEXT DEFAULT 0,
-					appeals_website_message TEXT DEFAULT 0,
+					appeals_message TEXT DEFAULT 'New ban appeal',
+					appeals_website_message TEXT DEFAULT 'Please write in detail why you think you should be unbanned',
 					appeals_poll BOOLEAN DEFAULT 1
 				)''')
 
@@ -121,8 +121,22 @@ def create_appeals_table():
 						user_id INTEGER,
 						active BOOLEAN,
 						cooldown BOOLEAN,
+						banned BOOLEAN,
 						time TEXT
 					)''')
+
+	new_columns = {
+		'banned': ["BOOLEAN", 0]
+	}
+
+	c.execute("PRAGMA table_info(guilds)")
+	columns = [column[1] for column in c.fetchall()]
+
+	for column in new_columns:
+		if column not in columns:
+			c.execute(f'''
+				ALTER TABLE appeals ADD COLUMN {column} {new_columns[column][0]} DEFAULT {new_columns[column][1]}
+			''')
 
 	conn.commit()
 	conn.close()

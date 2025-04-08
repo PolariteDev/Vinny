@@ -1,6 +1,6 @@
 <!-- 
 vinny - discord moderation bot
-Copyright (C) 2024 0vf
+Copyright (C) 2024-2025 Polarograph
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -30,15 +30,32 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 		</div>
 		<div class="message-body">
 			<p class="is-size-5.5">{{ server_message }}</p>
+			<p class="is-size-5.5">Appeal must be between 100-800 characters in length</p>
 			<br>
 			<form method="POST">
 				<div class="control">
-					<textarea class="textarea" type="text" name="appeal_text" placeholder="Type your appeal here"></textarea>
+					<textarea class="textarea" type="text" id="appeal_text" name="appeal_text" placeholder="Type your appeal here" maxlength="800" minlength="100"></textarea>
 				</div>
+				<p id="length_warning" class="has-text-danger" hidden=""><i class="fa-solid fa-circle-exclamation"></i> Appeal must be over 100 in length & under 800 in length!</p>
 				<br>
-				<button class="button is-fullwidth is-success" type="submit">Submit</button>
+				<button id="submit_button" class="button is-fullwidth is-success" type="submit">Submit</button>
 			</form>
 		</div>
 	</article>
 </div>
+<script>
+	$(document).ready(function() {
+		$('#submit_button').prop('disabled', true);
+		$('#length_warning').prop('hidden', true);
+		$('#appeal_text').on('input', function() {
+			var textareaLength = $(this).val().length;
+			if(textareaLength >= 100 && textareaLength <= 800) {
+				$('#submit_button').prop('disabled', false);
+				$('#length_warning').prop('hidden', true);
+			} else {
+				$('#submit_button').prop('disabled', true);
+			}
+		});
+	});
+</script>
 {% endblock %}

@@ -1,5 +1,5 @@
 # vinny - discord moderation bot
-# Copyright (C) 2024 0vf
+# Copyright (C) 2024-2025 Polarograph
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ class bot(commands.Bot):
 			max_messages=5000,
 			command_prefix="Vinny",
 			allowed_mentions=allowed_mentions,
-			activity=discord.Activity(type=discord.ActivityType.listening, name="your every move")
+			activity=discord.Activity(type=discord.ActivityType.watching, name="over Polarite")
 		)
 
 bot = bot()
