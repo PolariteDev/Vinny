@@ -201,7 +201,7 @@ async def server_view(guild_id):
 		for form in form_fields:
 			if form_fields[form] is None:
 				continue
-			elif form_fields[form] == 0 or form_fields[form] == 1 or form_fields[form] in guild_channels.response or form in ('max_s1_moderations', 'max_s2_moderations', 'max_s3_moderations', 'appeals_message', 'appeals_website_message'):
+			elif form_fields[form] == 0 or form_fields[form] == "0" or form_fields[form] == 1 or form_fields[form] in guild_channels.response or form in ('max_s1_moderations', 'max_s2_moderations', 'max_s3_moderations', 'appeals_message', 'appeals_website_message'):
 				db.set_config_value(guild_id, form, form_fields[form], conn, c)
 		db_values = {}
 		defaults = {
