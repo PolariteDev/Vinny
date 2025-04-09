@@ -555,6 +555,14 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 			}, 100);
 		});
 	
+		savedTimeout = () => {
+			const unsavedNotice = document.getElementById('unsaved-notif');
+			console.log(unsavedNotice.style.visibility);
+			if (unsavedNotice.style.visibility === 'hidden') {
+				document.querySelector('.save-notification-container').classList.remove('visible');
+			};
+		}
+
 		{% if saved %}
 			const container = document.querySelector('.save-notification-container');
 			const successNotice = container.querySelector('.is-success');
@@ -562,9 +570,8 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 			if (successNotice) {
 				container.classList.add('visible');
 				unsavedNotice.style.visibility = 'hidden';
-				setTimeout(() => container.classList.remove('visible'), 3000);
 			}
-			setTimeout(() => document.querySelector('.save-notification-container').classList.remove('visible'), 3000);
+			setTimeout(() => savedTimeout(), 3000);
 		{% endif %}
 	});
 
