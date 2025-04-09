@@ -12,7 +12,7 @@ Self-hosted moderation bot
 - Moderation marking (the ability to mark moderations as active or inactive)
 
 ### Dependencies
-- **Atleast Python 3.12**
+- **Atleast Python 3.11**
 - discord.py
 - discord.py-pagination
 - Flask (flask[async])
