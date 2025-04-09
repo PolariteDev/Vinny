@@ -22,340 +22,554 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 
 {% extends "base.html" %}
 {% block content %}
-<section class="hero-head">
-	<div class="container" style="display: flex; align-items: center;">
-		<span style="margin-right: 10px;"><div class="image is-32x32"><img class="is-rounded" src="{{ guild.icon_url if guild.icon_url else 'https://cdn.discordapp.com/embed/avatars/1.png' }}"></div></span>
-		<span class="server-dash-text is-size-4 has-text-weight-normal">{{ guild.name }} <a href="/dashboard/server/{{ guild.id }}/moderations/page/1" class="tag">View moderations</a></span>
-		<br>
-	</div>
-	<br><br>
-	<div class="container hero">
-		<form method="POST" class="field">
-		<div class="panel is-primary">
-			<p class="panel-heading">Channel configuration</p>
-			
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Moderation log channel</label>
-					<div class="control">
-						<div class="select">
-							<select id="log_channel" name="log_channel">
-								<option value="0">None</option>
-								{% for id, name in guild_channels.items() %}
-									<option value="{{ id }}">{{ name }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
+<section class="section">
+	<div class="container">
+		<div class="level is-mobile">
+			<div class="level-left">
+				<div class="level-item">
+					<figure class="image is-48x48">
+						<img class="is-rounded" src="{{ guild.icon_url if guild.icon_url else 'https://cdn.discordapp.com/embed/avatars/1.png' }}">
+					</figure>
+				</div>
+				<div class="level-item">
+					<h1 class="title is-4">{{ guild.name }}</h1>
 				</div>
 			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Event log channel</label>
-					<div class="control">
-						<div class="select">
-							<select id="event_log_channel" name="event_log_channel">
-								<option value="0">None</option>
-								{% for id, name in guild_channels.items() %}
-									<option value="{{ id }}">{{ name }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label data-tooltip="Channel to send ban appeals to (staff chat recommended)" class="label">Appeal channel <i class="fas fa-info-circle"></i></label>
-					<div class="control">
-						<div class="select">
-							<select id="appeals_channel" name="appeals_channel">
-								<option value="0">None</option>
-								{% for id, name in guild_channels.items() %}
-									<option value="{{ id }}">{{ name }}</option>
-								{% endfor %}
-							</select>
-						</div>
-					</div>
-				</div>
+			<div class="level-right">
+				<a href="/dashboard/server/{{ guild.id }}/moderations/page/1" class="button is-info is-outlined">
+					<span class="icon"><i class="fas fa-list"></i></span>
+					<span>View Moderations</span>
+				</a>
 			</div>
 		</div>
-		<div class="panel is-link">
-			<p class="panel-heading">Moderation configuration</p>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label" data-tooltip="Filter & log messages hidden in message nonces.">Nonce filtering <i class="fas fa-info-circle"></i></label>
-					<div class="control">
-						<div class="select">
-							<select id="nonce_filter" name="nonce_filter">
-								<option value="0">False</option>
-								<option value="1">True</option>
-							</select>
+
+		<form onsubmit="return onSave()" method="POST">
+			<div class="columns">
+				<div class="column">
+					<div class="box">
+						<h2 class="title is-5 has-text-link mb-4">
+							<span class="icon"><i class="fas fa-hashtag"></i></span>
+							Channel Configuration
+						</h2>
+						
+						<div class="field">
+							<label class="label">Moderation Log Channel</label>
+							<div class="control has-icons-left">
+								<div class="select is-fullwidth">
+									<select id="log_channel" name="log_channel">
+										<option value="0">None</option>
+										{% for id, name in guild_channels.items() %}
+											<option value="{{ id }}">{{ name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<span class="icon is-left"><i class="fas fa-gavel"></i></span>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label">Event Log Channel</label>
+							<div class="control has-icons-left">
+								<div class="select is-fullwidth">
+									<select id="event_log_channel" name="event_log_channel">
+										<option value="0">None</option>
+										{% for id, name in guild_channels.items() %}
+											<option value="{{ id }}">{{ name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<span class="icon is-left"><i class="fas fa-clipboard-list"></i></span>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label" data-tooltip="Channel to send ban appeals to (staff chat recommended)">
+								Appeal Channel
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control has-icons-left">
+								<div class="select is-fullwidth">
+									<select id="appeals_channel" name="appeals_channel">
+										<option value="0">None</option>
+										{% for id, name in guild_channels.items() %}
+											<option value="{{ id }}">{{ name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<span class="icon is-left"><i class="fas fa-envelope-open-text"></i></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="box mt-5">
+						<h2 class="title is-5 has-text-danger mb-4">
+							<span class="icon"><i class="fas fa-user-shield"></i></span>
+							Moderation Settings
+						</h2>
+						
+						<div class="field">
+							<label class="label" data-tooltip="Filter & log messages hidden in message nonces">
+								Nonce Filtering
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="nonce_filter" name="nonce_filter">
+										<option value="0">Disabled</option>
+										<option value="1">Enabled</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label" data-tooltip="Automatically escalate moderations when limits are exceeded">
+								Max Moderations System
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="max_moderations_enabled" name="max_moderations_enabled">
+										<option value="1">Enabled</option>
+										<option value="0">Disabled</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="columns">
+							<div class="column">
+								<div class="field">
+									<label class="label">Max S1 Moderations</label>
+									<div class="control">
+										<input class="input" type="number" min="0" id="max_s1_moderations" name="max_s1_moderations">
+									</div>
+								</div>
+							</div>
+							<div class="column">
+								<div class="field">
+									<label class="label">Max S2 Moderations</label>
+									<div class="control">
+										<input class="input" type="number" min="0" id="max_s2_moderations" name="max_s2_moderations">
+									</div>
+								</div>
+							</div>
+							<div class="column">
+								<div class="field">
+									<label class="label">Max S3 Moderations</label>
+									<div class="control">
+										<input class="input" type="number" min="0" id="max_s3_moderations" name="max_s3_moderations">
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label">Ban Appeals System</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="appeals" name="appeals">
+										<option value="1">Enabled</option>
+										<option value="0">Disabled</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label" data-tooltip="Message displayed on the appeal page">
+								Appeal Page Message
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control">
+								<textarea class="textarea" id="appeals_website_message" name="appeals_website_message" rows="3"></textarea>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label" data-tooltip="Message sent with appeal notifications">
+								Appeal Notification Content
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control">
+								<textarea class="textarea" id="appeals_message" name="appeals_message" rows="3"></textarea>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label" data-tooltip="Create automatic polls for new appeals (Polls do not automatically unban)">
+								Appeal Poll System
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="appeals_poll" name="appeals_poll">
+										<option value="1">Enabled</option>
+										<option value="0">Disabled</option>
+									</select>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label" data-tooltip="Automatically 'escalate' moderations when their sanctions exceed the limit">Maximum moderations <i class="fas fa-info-circle"></i></label>
-					<div class="control">
-						<div class="select">
-							<select id="max_moderations_enabled" name="max_moderations_enabled">
-								<option value="1">Enabled</option>
-								<option value="0">Disabled</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Maximum S1 moderations</label>
-					<div class="control">
-						<input class="input" id="max_s1_moderations" name="max_s1_moderations" type="text" min="0" step="1">
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Maximum S2 moderations</label>
-					<div class="control">
-						<input class="input" id="max_s2_moderations" name="max_s2_moderations" type="text" min="0" step="1">
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Maximum S3 moderations</label>
-					<div class="control">
-						<input class="input" id="max_s3_moderations" name="max_s3_moderations" type="text" min="0" step="1">
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Ban appeals</label>
-					<div class="control">
-						<div class="select">
-							<select id="appeals" name="appeals">
-								<option value="1">Enabled</option>
-								<option value="0">Disabled</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label data-tooltip="Message to display on the server's appeal page" class="label">Appeal website message <i class="fas fa-info-circle"></i></label>
-					<div class="control" style="width: 500px;">
-						<textarea class="textarea" id="appeals_website_message" name="appeals_website_message" type="text"></textarea>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label data-tooltip="Content to display on the appeal message sent to the appeal channel alongside the embed" class="label">Appeal message <i class="fas fa-info-circle"></i></label>
-					<div class="control" style="width: 500px;">
-						<textarea class="textarea" id="appeals_message" name="appeals_message" type="text"></textarea>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label data-tooltip="The poll is not automatic, the appeal will have to be accepted manually" class="label">Automatically create an appeal poll <i class="fas fa-info-circle"></i></label>
-					<div class="control">
-						<div class="select">
-							<select id="appeals_poll" name="appeals_poll">
-								<option value="1">Enabled</option>
-								<option value="0">Disabled</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="panel is-warning">
-			<p class="panel-heading">Event configuration</p>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Don't log events from bots</label>
-					<div class="control">
-						<div class="select">
-							<select id="bot_filter" name="bot_filter">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
+
+				<div class="column">
+					<div class="box">
+						<h2 class="title is-5 has-text-warning mb-4">
+							<span class="icon"><i class="fas fa-bell"></i></span>
+							Event Logging
+						</h2>
+						
+						<div class="columns is-multiline">
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Bot Activity Filter</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="bot_filter" name="bot_filter">
+												<option value="1">Enabled</option>
+												<option value="0">Disabled</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Message Edits</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_message_edit" name="on_message_edit">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Message Deletes</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_message_delete" name="on_message_delete">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Member Joins</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_member_join" name="on_member_join">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Member Leaves</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_member_leave" name="on_member_leave">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Member Updates</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_member_update" name="on_member_update">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Channel Creation</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_guild_channel_create" name="on_guild_channel_create">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="column is-half">
+								<div class="field">
+									<label class="label">Channel Deletion</label>
+									<div class="control">
+										<div class="select is-fullwidth">
+											<select id="on_guild_channel_delete" name="on_guild_channel_delete">
+												<option value="1">Log</option>
+												<option value="0">Ignore</option>
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log message edits</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_message_edit" name="on_message_edit">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
+			<input type="hidden" id="db_log_channel" name="db_log_channel" value="{{ db_values['log_channel_id'] }}">
+			<input type="hidden" id="db_event_log_channel" name="db_event_log_channel" value="{{ db_values['event_log_channel_id'] }}">
+			<input type="hidden" id="db_nonce_filter" name="db_nonce_filter" value="{{ db_values['nonce_filter'] }}">
+			<input type="hidden" id="db_bot_filter" name="db_bot_filter" value="{{ db_values['bot_filter'] }}">
+			<input type="hidden" id="db_on_message_edit" name="db_on_message_edit" value="{{ db_values['on_message_edit'] }}">
+			<input type="hidden" id="db_on_message_delete" name="db_on_message_delete" value="{{ db_values['on_message_delete'] }}">
+			<input type="hidden" id="db_on_guild_channel_create" name="db_on_guild_channel_create" value="{{ db_values['on_guild_channel_create'] }}">
+			<input type="hidden" id="db_on_guild_channel_delete" name="db_on_guild_channel_delete" value="{{ db_values['on_guild_channel_delete'] }}">
+			<input type="hidden" id="db_on_member_join" name="db_on_member_join" value="{{ db_values['on_member_join'] }}">
+			<input type="hidden" id="db_on_member_leave" name="db_on_member_leave" value="{{ db_values['on_member_leave'] }}">
+			<input type="hidden" id="db_on_member_update" name="db_on_member_update" value="{{ db_values['on_member_update'] }}">
+			<input type="hidden" id="db_max_moderations_enabled" name="db_max_moderations_enabled" value="{{ db_values['max_moderations_enabled'] }}">
+			<input type="hidden" id="db_max_s1_moderations" name="db_max_s1_moderations" value="{{ db_values['max_s1_moderations'] }}">
+			<input type="hidden" id="db_max_s2_moderations" name="db_max_s2_moderations" value="{{ db_values['max_s2_moderations'] }}">
+			<input type="hidden" id="db_max_s3_moderations" name="db_max_s3_moderations" value="{{ db_values['max_s3_moderations'] }}">
+			<input type="hidden" id="db_appeals" name="db_appeals" value="{{ db_values['appeals'] }}">
+			<input type="hidden" id="db_appeals_channel" name="db_appeals_channel" value="{{ db_values['appeals_channel_id'] }}">
+			<input type="hidden" id="db_appeals_message" name="db_appeals_message" value="{{ db_values['appeals_message'] }}">
+			<input type="hidden" id="db_appeals_website_message" name="db_appeals_website_message" value="{{ db_values['appeals_website_message'] }}">
+			<input type="hidden" id="db_appeals_poll" name="db_appeals_website_message" value="{{ db_values['appeals_poll'] }}">
+
+			<div class="save-notification-container">
+				<div class="save-notification box is-warning has-text-weight-bold hidden" id="unsaved-notif">
+					<div class="level is-mobile">
+						<div class="level-left">
+							<div class="level-item">
+								<span class="icon is-medium"><i class="fas fa-exclamation-triangle"></i></span>
+								<span>You have unsaved changes!</span>
+							</div>
+						</div>
+						<div class="level-right">
+							<div class="level-item">
+								<button type="submit" class="button is-primary is-medium">
+									<span class="icon"><i class="fas fa-save"></i></span>
+									<span>Save Now</span>
+								</button>
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log message deletes</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_message_delete" name="on_message_delete">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
+			
+				{% if saved %}
+				<div class="save-notification box is-success has-text-weight-bold">
+					<div class="level is-mobile">
+						<div class="level-left">
+							<div class="level-item">
+								<span class="icon is-medium"><i class="fas fa-check-circle"></i></span>
+								<span>Changes saved successfully!</span>
+							</div>
 						</div>
 					</div>
 				</div>
+				{% endif %}
 			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log member joins</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_member_join" name="on_member_join">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log member leaves</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_member_leave" name="on_member_leave">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log member updates</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_member_update" name="on_member_update">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log channel creation</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_guild_channel_create" name="on_guild_channel_create">
-								<option value="0">False</option>
-								<option value="1">True</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-			<div class="panel-block">
-				<div class="field">
-					<label class="label">Log channel deletion</label>
-					<div class="control">
-						<div class="select">
-							<select id="on_guild_channel_delete" name="on_guild_channel_delete">
-								<option value="1">True</option>
-								<option value="0">False</option>
-							</select>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-		<div class="panel is-success">
-			<div class="panel-block">
-				<div class="control">
-					<input type="hidden" id="db_log_channel" name="db_log_channel" value="{{ db_values['log_channel_id'] }}">
-					<input type="hidden" id="db_event_log_channel" name="db_event_log_channel" value="{{ db_values['event_log_channel_id'] }}">
-					<input type="hidden" id="db_nonce_filter" name="db_nonce_filter" value="{{ db_values['nonce_filter'] }}">
-					<input type="hidden" id="db_bot_filter" name="db_bot_filter" value="{{ db_values['bot_filter'] }}">
-					<input type="hidden" id="db_on_message_edit" name="db_on_message_edit" value="{{ db_values['on_message_edit'] }}">
-					<input type="hidden" id="db_on_message_delete" name="db_on_message_delete" value="{{ db_values['on_message_delete'] }}">
-					<input type="hidden" id="db_on_guild_channel_create" name="db_on_guild_channel_create" value="{{ db_values['on_guild_channel_create'] }}">
-					<input type="hidden" id="db_on_guild_channel_delete" name="db_on_guild_channel_delete" value="{{ db_values['on_guild_channel_delete'] }}">
-					<input type="hidden" id="db_on_member_join" name="db_on_member_join" value="{{ db_values['on_member_join'] }}">
-					<input type="hidden" id="db_on_member_leave" name="db_on_member_leave" value="{{ db_values['on_member_leave'] }}">
-					<input type="hidden" id="db_on_member_update" name="db_on_member_update" value="{{ db_values['on_member_update'] }}">
-					<input type="hidden" id="db_max_moderations_enabled" name="db_max_moderations_enabled" value="{{ db_values['max_moderations_enabled'] }}">
-					<input type="hidden" id="db_max_s1_moderations" name="db_max_s1_moderations" value="{{ db_values['max_s1_moderations'] }}">
-					<input type="hidden" id="db_max_s2_moderations" name="db_max_s2_moderations" value="{{ db_values['max_s2_moderations'] }}">
-					<input type="hidden" id="db_max_s3_moderations" name="db_max_s3_moderations" value="{{ db_values['max_s3_moderations'] }}">
-					<input type="hidden" id="db_appeals" name="db_appeals" value="{{ db_values['appeals'] }}">
-					<input type="hidden" id="db_appeals_channel" name="db_appeals_channel" value="{{ db_values['appeals_channel_id'] }}">
-					<input type="hidden" id="db_appeals_message" name="db_appeals_message" value="{{ db_values['appeals_message'] }}">
-					<input type="hidden" id="db_appeals_website_message" name="db_appeals_website_message" value="{{ db_values['appeals_website_message'] }}">
-					<input type="hidden" id="db_appeals_poll" name="db_appeals_website_message" value="{{ db_values['appeals_poll'] }}">
-					<button type="submit" class="button is-primary">Save</button><br>
-					{% if saved == True %}
-						<span class="has-text-success is-vcentered" style="vertical-align: bottom;"><i class="icon fa-solid fa-square-check"></i>Successfully saved!</span>
-					{% endif %}
-				</div>
-			</div>
-		</div>
-		<br>
-		<br>
 		</form>
 	</div>
 </section>
-<script>
-	$(document).ready(function() {
-		var dbElements = {};
-		$('[id^="db_"]').each(function() {
-			var id = $(this).attr('id');
-			var value = $(this).val();
-			dbElements[id] = value;
-		});
-	
-		$.each(dbElements, function(id, value) {
-			var newId = id.replace('db_', '');
-			$('#' + newId).val(value);
-		});
 
-		$('#max_s1_moderations, #max_s2_moderations, #max_s3_moderations').keypress(function(e) {
-			var char = String.fromCharCode(e.which);
-			if (!(/[0-9]/.test(char))) {
-				e.preventDefault();
+<style>
+	.save-notification-container {
+		position: fixed;
+		bottom: -100px;
+		left: 50%;
+		transform: translateX(-50%);
+		z-index: 100;
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		opacity: 0;
+		width: 90%;
+		max-width: 600px;
+	}
+
+	.save-notification-container.visible {
+		bottom: 20px;
+		opacity: 1;
+	}
+
+	.save-notification {
+		font-size: 1.1rem;
+		padding: 1.25rem 1.5rem;
+	}
+
+	.dark-mode .save-notification {
+		background-color: var(--bulma-scheme-main) !important;
+		border: 1px solid var(--bulma-border);
+	}
+
+	@keyframes gentleBounce {
+		0% { transform: translateY(100%); }
+		90% { transform: translateY(-10%); }
+		100% { transform: translateY(0); }
+	}
+
+	.save-notification-enter {
+		animation: gentleBounce 0.5s ease-out;
+	}
+</style>
+
+<script>
+	function onSave(){
+		window.onbeforeunload = null;
+	}
+
+	function unloadPage(){ 
+		return "You have unsaved changes on this page. Do you want to leave this page and discard your changes or stay on this page?";
+	}
+
+	document.addEventListener('DOMContentLoaded', () => {
+		const dbElements = {
+			{% for key, value in db_values.items() %}
+				'{{ key }}': '{{ value }}',
+			{% endfor %}
+		};
+	
+		const elementMap = {
+			'log_channel_id': 'log_channel',
+			'event_log_channel_id': 'event_log_channel',
+			'nonce_filter': 'nonce_filter',
+			'bot_filter': 'bot_filter',
+			'on_message_edit': 'on_message_edit',
+			'on_message_delete': 'on_message_delete',
+			'on_guild_channel_create': 'on_guild_channel_create',
+			'on_guild_channel_delete': 'on_guild_channel_delete',
+			'on_member_join': 'on_member_join',
+			'on_member_leave': 'on_member_leave',
+			'on_member_update': 'on_member_update',
+			'max_moderations_enabled': 'max_moderations_enabled',
+			'max_s1_moderations': 'max_s1_moderations',
+			'max_s2_moderations': 'max_s2_moderations',
+			'max_s3_moderations': 'max_s3_moderations',
+			'appeals': 'appeals',
+			'appeals_channel_id': 'appeals_channel',
+			'appeals_message': 'appeals_message',
+			'appeals_website_message': 'appeals_website_message',
+			'appeals_poll': 'appeals_poll'
+		};
+	
+		Object.entries(elementMap).forEach(([dbKey, elementId]) => {
+			const element = document.getElementById(elementId);
+			if (element && dbElements[dbKey]) {
+				element.value = dbElements[dbKey];
 			}
 		});
-
-		function toggleModerationInputs() {
-			var isEnabled = $('#max_moderations_enabled').val() !== "0";
-			$('#max_s1_moderations, #max_s2_moderations, #max_s3_moderations').prop('disabled', !isEnabled);
-		}
+	
+		document.getElementById('db_appeals_poll').name = 'db_appeals_poll';
+	
+		const toggleInputs = (toggleId, elementIds) => {
+			const isEnabled = document.getElementById(toggleId).value === '1';
+			elementIds.forEach(id => {
+				const element = document.getElementById(id);
+				if (element) element.disabled = !isEnabled;
+			});
+		};
+	
+		const toggleModerationInputs = () => toggleInputs('max_moderations_enabled', ['max_s1_moderations', 'max_s2_moderations', 'max_s3_moderations']);
+		const toggleAppealInputs = () => toggleInputs('appeals', ['appeals_website_message', 'appeals_message', 'appeals_poll']);
 	
 		toggleModerationInputs();
-	
-		$('#max_moderations_enabled').change(toggleModerationInputs);
-
-		function toggleAppealInputs() {
-			var isEnabled = $('#appeals').val() !== "0";
-			$('#appeals_message, #appeals_website_message, #appeals_poll').prop('disabled', !isEnabled);
-		}
-	
 		toggleAppealInputs();
 	
-		$('#appeals').change(toggleAppealInputs);
+		document.getElementById('max_moderations_enabled').addEventListener('change', toggleModerationInputs);
+		document.getElementById('appeals').addEventListener('change', toggleAppealInputs);
+	
+		const formElements = document.querySelectorAll('select, input, textarea');
+		let initialValues = Array.from(formElements).reduce((acc, el) => {
+			acc[el.id] = el.value;
+			return acc;
+		}, {});
+	
+		const checkForChanges = () => {
+			return Array.from(formElements).some(el => initialValues[el.id] !== el.value);
+		};
+	
+		const updateSaveNotification = () => {
+			const container = document.querySelector('.save-notification-container');
+			const unsavedNotice = container.querySelector('.is-warning');
+			unsavedNotice.style.visibility = 'visible'
+	
+			if (checkForChanges()) {
+				container.classList.add('visible');
+				unsavedNotice.classList.remove('hidden');
+				const successNotice = container.querySelector('.is-success');
+				if (successNotice) successNotice.remove();
+				window.onbeforeunload = unloadPage;
+			} else {
+				container.classList.remove('visible');
+				unsavedNotice.classList.add('hidden');
+				window.onbeforeunload = null;
+			}
+		};
+	
+		formElements.forEach(el => el.addEventListener('input', updateSaveNotification));
+	
+		document.querySelector('form').addEventListener('submit', e => {
+			if (!checkForChanges()) {
+				e.preventDefault();
+				return;
+			}
+			setTimeout(() => {
+				initialValues = Array.from(formElements).reduce((acc, el) => {
+					acc[el.id] = el.value;
+					return acc;
+				}, {});
+				updateSaveNotification();
+			}, 100);
+		});
+	
+		{% if saved %}
+			const container = document.querySelector('.save-notification-container');
+			const successNotice = container.querySelector('.is-success');
+			const unsavedNotice = document.getElementById('unsaved-notif');
+			if (successNotice) {
+				container.classList.add('visible');
+				unsavedNotice.style.visibility = 'hidden';
+				setTimeout(() => container.classList.remove('visible'), 3000);
+			}
+			setTimeout(() => document.querySelector('.save-notification-container').classList.remove('visible'), 3000);
+		{% endif %}
 	});
+
+	function hideSaveNotification() {
+		document.querySelector('.save-notification').classList.add('hidden');
+	}
 </script>
 {% endblock %}

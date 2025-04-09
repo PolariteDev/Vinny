@@ -1,6 +1,6 @@
 /*
 vinny - discord moderation bot
-Copyright (C) 2024 0vf
+Copyright (C) 2024-2025 Polarograph
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -20,34 +20,32 @@ then contact me for inquiries/questions for permission. You will only be able to
 use my commits if you have received permission from me. <0vfx@proton.me>
 */
 
-.icon-text {
-	margin-right: 5px;
-}
-.modal {
-	z-index: 1;
+html, body {
+	height: 100%;
 }
 
-.modal-content {
-	margin: 15% auto;
-	padding: 20px;
-	border: 1px solid #1c1e21;
-	background-color: #1c1e21;
-	border-radius: 12px;
-	width: 80%;
+body {
+	display: flex;
+	flex-direction: column;
+	min-height: 100vh;
 }
 
-.close {
-	color: #aaa;
-	float: right;
-	font-size: 28px;
-	font-weight: bold;
+nav.navbar {
+	flex-shrink: 0;
 }
 
-.close:hover,
-.close:focus {
-	color: black;
-	text-decoration: none;
-	cursor: pointer;
+main.section {
+	flex: 1;
+	padding-bottom: 0;
+}
+
+footer.footer {
+	margin-top: auto;
+	padding: 2rem 1.5rem;
+}
+
+.is-circular {
+	border-radius: 50%;
 }
 
 .servers {
@@ -81,26 +79,19 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 }
 
 .is-server-button:hover {
-    transform: scale(1.05);
+	transform: scale(1.05);
 }
 
-.server-text {
-	font-size: 15px;
-	white-space: normal;
-	word-wrap: break-word;
+.has-radius {
+	border-radius: var(--radius);
 }
 
-.server-dash-text {
-	color: #383D49
+.has-transition {
+	transition: all 0.2s ease-in-out;
 }
 
 .dash-textarea {
-	width: max-content;
+	min-height: 150px;
+	width: 100%;
 	resize: vertical;
-}
-
-@media (prefers-color-scheme: dark) {
-	.server-dash-text {
-		color: #FFFFFF
-	}
 }

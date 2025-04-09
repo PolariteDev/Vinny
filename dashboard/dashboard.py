@@ -35,7 +35,7 @@ from utils import utils, db, info
 from ast import literal_eval
 from asyncio import sleep
 
-dashboard_version = "1.3.1"
+dashboard_version = "1.4.0"
 cached_usernames = {}
 
 app = Flask(__name__)
@@ -321,7 +321,7 @@ async def moderations(guild_id, page_number):
 	if guild_name is None:
 		abort(403)
 	if hero_chunk is None and page_number == 1:
-		return render_template('html_error.html', user=user, error="404", error_message="No moderations found for this server", title="404 Not found", description="404 Not found"), 404
+		return render_template('html_error.html', user=user, error="No moderations found", error_message="This server doesn't have a moderation yet", title="No moderations found", description="No moderations found"), 404
 	minimum_page = total_pages - (total_pages - 1)
 	if minimum_page <= page <= total_pages:
 		pass

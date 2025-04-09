@@ -17,86 +17,129 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 NOTE: If you wanna use my dashboard module without complying with above terms,
 then contact me for inquiries/questions for permission. You will only be able to
-use my commits if you have received permission from me. <0vfx@proton.me>
+use my commits if you have received permission from me. <polarographx@proton.me>
 -->
 
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>{{ title }} - Vinny</title>
-		<meta name="description" content="{{ description }}">
-		<meta property="og:title" content="{{ title }} - Vinny">
-		<meta property="og:description" content="{{ description }}">
-		<meta property="og:url" content="{{ url }}">
-		<meta property="og:type" content="website">
-		<meta content="#00BFFF" data-react-helmet="true" name="theme-color"/>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
-		<link rel="stylesheet" href="/static/style.css">
-		<script src="https://kit.fontawesome.com/9a62e95f30.js" crossorigin="anonymous"></script>
-		<link rel="preconnect" href="https://fonts.googleapis.com">
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-		<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
-		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip@1.2.0/dist/bulma-tooltip.min.css">
-	</head>
-	
-	<div class="container">
-		<nav class="navbar" role="navigation" aria-label="main navigation">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{ title }} - Vinny</title>
+	<meta name="description" content="{{ description }}">
+	<meta property="og:title" content="{{ title }} - Vinny">
+	<meta property="og:description" content="{{ description }}">
+	<meta property="og:url" content="{{ url }}">
+	<meta property="og:type" content="website">
+	<meta content="#00BFFF" data-react-helmet="true" name="theme-color"/>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.1/css/bulma.min.css">
+	<link rel="stylesheet" href="/static/style.css">
+	<script src="https://kit.fontawesome.com/9a62e95f30.js" crossorigin="anonymous"></script>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
+	<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@creativebulma/bulma-tooltip@1.2.0/dist/bulma-tooltip.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+
+<body>
+	<nav class="navbar is-spaced has-shadow" role="navigation" aria-label="main navigation">
+		<div class="container">
 			<div class="navbar-brand">
-				<span class="navbar-item has-text-weight-semibold server-dash-text" style="font-family:Ubuntu;font-weight: 300;">Vinny</span>
-				<a class="navbar-item" href="/">Home</a>
-				<a class="navbar-item" href="/dashboard">Dashboard</a>
-				<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar">
-				<span aria-hidden="true"></span>
-				<span aria-hidden="true"></span>
-				<span aria-hidden="true"></span>
-				<span aria-hidden="true"></span>
+				<a class="navbar-item" href="/">
+					<img src="{{ url_for('static', filename='favicon.ico') }}" alt="Vinny logo" width="28" height="28">
+					<span class="ml-2 has-text-weight-semibold is-size-5">Vinny</span>
+				</a>
+				<a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbarMenu">
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
+					<span aria-hidden="true"></span>
 				</a>
 			</div>
-			<div id="navbar" class="navbar-menu">
+	
+			<div id="navbarMenu" class="navbar-menu">
+				<div class="navbar-start">
+					<a class="navbar-item" href="/">Home</a>
+					<a class="navbar-item" href="/dashboard">Dashboard</a>
+				</div>
+	
 				<div class="navbar-end">
 					<div class="navbar-item">
-						<button class="image userButton">
-							<img class="is-rounded" src="{{ user.avatar_url }}"/>
-						</button>
+						<div class="buttons">
+							<a class="button is-ghost" href="https://github.com/polarograph/vinny" style="text-decoration: none;">
+								<span class="icon">
+									<i class="fab fa-github" style="font-size: 25px;"></i>
+								</span>
+							</a>
+							{% if user %}
+							<div class="navbar-item has-dropdown is-hoverable">
+								<a class="navbar-link">
+									<figure class="image is-24x24" style="margin-right: 8px;">
+										<img class="is-circular" src="{{ user.avatar_url }}" alt="User avatar">
+									</figure>
+									<span>{{ user.name }}</span>
+								</a>
+								<div class="navbar-dropdown is-right">
+									<div class="navbar-item">
+										<div>
+											<p class="has-text-weight-semibold">{{ user.name }}</p>
+											<p class="has-text-grey is-size-7">ID: {{ user.id }}</p>
+										</div>
+									</div>
+									<hr class="navbar-divider">
+									<a class="navbar-item" href="/logout">
+										<span class="icon">
+											<i class="fas fa-sign-out-alt"></i>
+										</span>
+										<span>Log out</span>
+									</a>
+								</div>
+							</div>
+							{% endif %}
+						</div>
 					</div>
-					<a class="navbar-item navbar-burger" href="https://github.com/polarograph/vinny">
-						<i class="fab fa-github" style="font-size: 25px;"></i>
-					</a>
 				</div>
 			</div>
-		</nav>
-	</div>
+		</div>
+	</nav>   
 
-<br>
-<br>
-	<body>
-		<section class="hero is-fullheight">
+	<main class="section">
+		<div class="container">
 			{% block content %}
 			{% endblock %}
-			<div id="userModal" class="modal">
-				<div class="modal-content">
-					<span class="close">&times;</span>
-					<p>{{ user.name }}</p>
-					<p>{{ user.id }}</p>
-					<br>
-					<a class="button is-danger" href="/logout">Log out</a>
-				</div>
-			</div>
-			<footer class="hero-foot footer" style="height: 16px">
-				<div class="content has-text-centered">
-					<p>
-						<strong><a href="https://github.com/polarograph/vinny">Vinny</a></strong> by <a href="https://github.com/polarograph">Polarograph</a>.
-						The source code and website is licensed under
-						<a href="https://www.gnu.org/licenses/gpl-3.0-standalone.html">GPL-3.0-or-later</a>.
-						<br>Running version {{ version }}, dashboard version {{ dashboard_version }}, <a href="/privacypolicy">Privacy Policy</a>
-					</p>
-				</div>
-			</footer>
-		</section>
-		<script src="/static/session.js"></script>
-	</body>
+		</div>
+	</main>
+
+	<footer class="footer">
+		<div class="content has-text-centered">
+			<p class="has-text-grey">
+				<strong><a href="https://github.com/polarograph/vinny" class="has-text-grey-dark">Vinny</a></strong> by 
+				<a href="https://github.com/polarograph" class="has-text-grey-dark">Polarograph</a>.
+				Licensed under <a href="https://www.gnu.org/licenses/gpl-3.0-standalone.html" class="has-text-grey-dark">GPL-3.0-or-later</a>.<br>
+				Running version {{ version }}, dashboard {{ dashboard_version }} · 
+				<a href="/privacypolicy" class="has-text-grey-dark">Privacy Policy</a>
+			</p>
+		</div>
+	</footer>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', () => {
+			const $navbarBurgers = Array.prototype.slice.call(document.querySelectorAll('.navbar-burger'), 0);
+			
+			if ($navbarBurgers.length > 0) {
+				$navbarBurgers.forEach( el => {
+					el.addEventListener('click', () => {
+						const target = el.dataset.target;
+						const $target = document.getElementById(target);
+						el.classList.toggle('is-active');
+						$target.classList.toggle('is-active');
+					});
+				});
+			}
+		});
+	</script>
+	<script src="/static/session.js"></script>
+</body>
 </html>
