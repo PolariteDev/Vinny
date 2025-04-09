@@ -25,7 +25,7 @@ Self-hosted moderation bot
 ### Setup
 Begin by cloning the repository
 ```
-git clone https://github.com/Polarite/Vinny
+git clone https://github.com/PolariteMC/Vinny
 cd Vinny
 ```
 Install required dependencies
