@@ -129,7 +129,7 @@ def create_appeals_table():
 		'banned': ["BOOLEAN", 0]
 	}
 
-	c.execute("PRAGMA table_info(guilds)")
+	c.execute("PRAGMA table_info(appeals)")
 	columns = [column[1] for column in c.fetchall()]
 
 	for column in new_columns:
