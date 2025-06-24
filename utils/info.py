@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-vinny_version = "0.6.0"
+vinny_version = "0.7.0"
 
 def get_vinny_version():
 	return vinny_version

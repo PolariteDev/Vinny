@@ -37,7 +37,7 @@ from utils import utils, db, info
 from ast import literal_eval
 from asyncio import sleep
 
-dashboard_version = "1.4.0"
+dashboard_version = "1.5.0"
 cached_usernames = {}
 cached_avatars = {}
 
