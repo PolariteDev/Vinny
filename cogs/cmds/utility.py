@@ -43,7 +43,7 @@ class TicketButton(Button):
 
 			await utility.create_ticket(utility, reason, interaction)
 		except Exception as e:
-			print(e)
+			print(f"Error while opening ticket (via panel): {e}")
 
 class TicketView(View):
 	def __init__(self, view_id: str, bot: Bot):
@@ -119,7 +119,7 @@ class utility(commands.Cog):
 			embed = discord.Embed(title="New Ticket Opened", color=0x3452E8, timestamp=datetime.now())
 			embed.add_field(name="By", value=user.mention)
 			embed.add_field(name="Reason", value=f"{reason}")
-			embed.set_footer("To close this ticket, use the /close_ticket command")
+			embed.set_footer(text="To close this ticket, use the /close_ticket command", icon_url=interaction.client.user.display_avatar.url)
 			await channel.send(content="@everyone", embed=embed, allowed_mentions=AllowedMentions(everyone=True))
 			await interaction.response.send_message(f"Your ticket has been created: {channel.mention}", ephemeral=True)
 
