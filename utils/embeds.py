@@ -142,6 +142,20 @@ async def member_remove(member: discord.Member):
 	embed.set_thumbnail(url=member.avatar)
 	return embed
 
+async def ticket_open(id: int, user: discord.Member, channel: discord.TextChannel, reason: str):
+	embed = discord.Embed(title=f"Ticket opened (#{id})", color=0x3452E8, timestamp=datetime.datetime.now())
+	embed.add_field(name="Opened By", value=user.mention)
+	embed.add_field(name="Channel", value=channel.mention)
+	embed.add_field(name="Reason", value=f"{reason}")
+	return embed
+
+async def ticket_close(id: int, user: discord.Member, closer: discord.Member, log: str):
+	embed = discord.Embed(title=f"Ticket closed (#{id})", color=16729932, timestamp=datetime.datetime.now())
+	embed.add_field(name="Opened By", value=user.mention)
+	embed.add_field(name="Closed By", value=closer.mention)
+	embed.add_field(name="Log", value=log)
+	return embed
+
 async def moderation_change_reason(moderator: discord.Member, moderation_id: str, moderation_type: str, new_reason: str, old_reason: str):
 	embed = discord.Embed(title=f"Moderation `{moderation_id}` - {moderation_type} (Reason changed)", color=16753920, timestamp=datetime.datetime.now())
 	embed.add_field(name="Moderator", value=f"{moderator.mention}")

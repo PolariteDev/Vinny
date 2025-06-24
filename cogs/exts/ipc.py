@@ -70,6 +70,10 @@ class Routes(commands.Cog):
 			return {}
 
 	@Server.route()
+	async def get_bot_id(self, data):
+		return(str(self.bot.user.id))
+
+	@Server.route()
 	async def check_admin(self, data):
 		guild_id = data['guild_id']
 		user_id = data['user_id']
@@ -79,6 +83,23 @@ class Routes(commands.Cog):
 			return False
 		
 		if member.guild_permissions.administrator:
+			return repr(True)
+		else:
+			return repr(False)
+
+	@Server.route()
+	async def check_mod(self, data):
+		guild_id = data['guild_id']
+		user_id = data['user_id']
+		guild = self.bot.get_guild(guild_id)
+		member = guild.get_member(user_id)
+		if member is None:
+			return False
+		
+		if member.guild_permissions.administrator:
+			return repr(True)
+
+		if member.guild_permissions.moderate_members:
 			return repr(True)
 		else:
 			return repr(False)
@@ -96,6 +117,22 @@ class Routes(commands.Cog):
 		if username is None:
 			username = data['id'].id
 		return username
+
+	@Server.route()
+	async def get_user_avatar_url(self, data):
+		avatar_url = None
+		try:
+			user = self.bot.get_user(data['user_id'])
+			if user is None:
+				user = await self.bot.fetch_user(data['user_id'])
+			avatar_url = user.avatar.url if user.avatar else user.default_avatar.url
+		except Exception:
+			pass
+
+		if not avatar_url:
+			avatar_url = 'https://cdn.discordapp.com/embed/avatars/1.png'
+
+		return avatar_url
 
 	@Server.route()
 	async def get_ban_status(self, data):

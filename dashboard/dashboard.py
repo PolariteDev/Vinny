@@ -18,16 +18,18 @@
 # then contact me for inquiries/questions for permission. You will only be able to
 # use my commits if you have received permission from me. <0vfx@proton.me>
 
-from datetime import datetime
+import datetime
 from functools import wraps
 from importlib.metadata import requires
 from pydoc import describe
 import time
 from xmlrpc.client import boolean
-from flask import Flask, render_template, redirect, render_template_string, request, url_for, abort, current_app
+from flask import Flask, Response, render_template, redirect, render_template_string, request, url_for, abort, current_app
 from flaskcord import DiscordOAuth2Session, requires_authorization, Unauthorized, models
 from discord.ext.ipc import Client
 from discord import Guild
+import json
+import html
 import sys
 import os
 sys.path.append(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')))
@@ -37,6 +39,7 @@ from asyncio import sleep
 
 dashboard_version = "1.4.0"
 cached_usernames = {}
+cached_avatars = {}
 
 app = Flask(__name__)
 
@@ -301,7 +304,7 @@ async def moderations(guild_id, page_number):
 						cached_usernames.update({moderation[3]: mutable_moderation[3]})
 					else:
 						mutable_moderation[3] = cached_usernames[moderation[3]]
-					mutable_moderation[7] = (datetime.fromtimestamp(float(moderation[7]))).strftime("%Y-%m-%d %H:%M:%S")
+					mutable_moderation[7] = (datetime.datetime.fromtimestamp(float(moderation[7]), datetime.UTC)).strftime("%Y-%m-%d %H:%M:%S")
 					if mutable_moderation[8] is None or mutable_moderation[8] == "N/A":
 						mutable_moderation[8] = ""
 					if mutable_moderation[9] == 0:
@@ -425,6 +428,155 @@ async def appeal(guild_id):
 		server_message = db.get_config_value(guild_id, "appeals_website_message", c, "Please write in detail why you think you should be unbanned")
 		conn.close()
 		return render_template("appeal.html", guild_name=guild_name, user=user, title=f"Submit an appeal in {guild_name}", description=f"Fill in the required form & submit.", server_message=server_message)
+
+@app.route("/dashboard/server/<int:guild_id>/ticket/<int:ticket_id>", methods=["GET","POST"])
+@requires_authorization
+async def view_ticket(guild_id, ticket_id):
+	user = OAuth2.fetch_user()
+	mod_bool = await ipc.request("check_mod", user_id=user.id, guild_id=guild_id)
+	try:
+		mod_bool = literal_eval(mod_bool.response)
+	except Exception:
+		mod_bool = False
+	if not mod_bool:
+		abort(403)
+
+	conn, c = db.db_connect()
+	c.execute('SELECT reason, active, messages, user_id, time FROM tickets WHERE guild_id=? AND ticket_id=?', (guild_id, ticket_id))
+	row = c.fetchone()
+	conn.close()
+	if not row:
+		abort(404)
+
+	reason, active, messages_json, user_id, time_unix = row
+	if active:
+		abort(403)
+
+	vinny_id = int((await ipc.request("get_bot_id")).response)
+
+	try:
+		if messages_json == "deleted":
+			msgs = [{
+				"timestamp": time_unix,
+				"author_id": vinny_id,
+				"content": "Ticket content deleted as it was older than 30 days.",
+				"deleted": True
+			}]
+		else:
+			msgs = json.loads(messages_json) if messages_json else []
+	except json.JSONDecodeError:
+		msgs = []
+
+	ticket_log = ""
+	last_author = None
+	last_ts = None
+	group_open = False
+
+	for m in msgs:
+		ts = m.get("timestamp")
+		author = m.get("author_id")
+
+		author_username = cached_usernames.get(author) or (await ipc.request("get_username", user_id=author)).response
+		cached_usernames[author] = author_username
+
+		avatar_url = cached_avatars.get(author) or (await ipc.request("get_user_avatar_url", user_id=author)).response
+		cached_avatars[author] = avatar_url
+
+		versions = [m.get("content", "")]
+		edits = m.get("edits", {})
+		for idx in sorted(edits, key=lambda x: int(x)):
+			versions.append(edits[idx]["new"])
+
+		danger_class = " has-text-danger" if m.get("deleted") else ""
+
+		if author != last_author or (last_ts and ts - last_ts > 300):
+			if group_open:
+				ticket_log += "</div></div>"
+				group_open = False
+
+			ticket_log += f"""
+				<div style="display: flex; margin-bottom: 1em;">
+					<img src="{avatar_url}" alt="{author_username}'s avatar"
+						style="width: 40px; height: 40px; border-radius: 50%; margin-right: 10px;">
+					<div>
+						<strong>{author_username}</strong>
+						<span style="color: gray; font-size: 0.9em;">
+							at {datetime.datetime.fromtimestamp(int(ts), datetime.UTC).strftime("%d/%m/%Y, %H:%M")} UTC
+						</span>
+			"""
+			group_open = True
+
+		parts = []
+		for i, text in enumerate(versions):
+			is_last = (i == len(versions) - 1)
+			opacity = 1 if is_last else 0.5
+			escaped = html.escape(text)
+			if is_last and i > 0:
+				escaped += ' <span class="has-text-grey" style="font-size: 0.75em;">(edited)</span>'
+			parts.append(f'<span style="opacity:{opacity};">{escaped}</span>')
+		joined = '<br>'.join(parts)
+		ticket_log += f'<p style="margin:4px 0 0 0;" class="{danger_class}">{joined}</p>'
+
+		last_author = author
+		last_ts = ts
+
+	if group_open:
+		ticket_log += "</div></div>"
+
+	guild_name = (await ipc.request("get_guild_name", guild_id=guild_id)).response
+	return render_template('ticket.html', ticket_log=ticket_log, user=user, reason=reason, ticket_id=ticket_id, guild_name=guild_name, guild_id=guild_id, title=f"Ticket #{ticket_id} - {guild_name}", user_name=(await ipc.request("get_username", user_id=user_id)).response, time_unix=datetime.datetime.fromtimestamp(int(time_unix), datetime.UTC).strftime("%d/%m/%Y, %H:%M"))
+
+@app.route("/dashboard/server/<int:guild_id>/ticket/<int:ticket_id>/download", methods=['GET'])
+@requires_authorization
+async def download_ticket_log(guild_id, ticket_id):
+	user = OAuth2.fetch_user()
+	mod_bool = await ipc.request("check_mod", user_id=user.id, guild_id=guild_id)
+	try:
+		mod_bool = literal_eval(mod_bool.response)
+	except Exception:
+		mod_bool = False
+	if not mod_bool:
+		abort(403)
+
+	conn, c = db.db_connect()
+	c.execute('SELECT messages FROM tickets WHERE guild_id = ? AND ticket_id = ?', (guild_id, ticket_id))
+	row = c.fetchone()
+	conn.close()
+
+	if not row:
+		abort(404)
+
+	messages_json = row[0]
+	try:
+		msgs = json.loads(messages_json) if messages_json else []
+	except json.JSONDecodeError:
+		msgs = []
+
+	lines = []
+	for m in msgs:
+		ts = m.get("timestamp")
+		author = m.get("author_id")
+		if author in cached_usernames:
+			author_username = cached_usernames[author]
+		else:
+			author_username = (await ipc.request("get_username", user_id=author)).response
+			cached_usernames[author] = author_username
+
+		time_str = datetime.datetime.fromtimestamp(int(ts), datetime.UTC).strftime("%d/%m/%Y, %H:%M")
+		if m.get("deleted"):
+			lines.append(f"{author_username} ({time_str} UTC) - {content} [message deleted]")
+		else:
+			content = m.get("content", "").replace("\n", " ")
+			lines.append(f"{author_username} ({time_str} UTC) - {content}")
+
+		edits = m.get("edits", {})
+		for idx in sorted(edits, key=lambda x: int(x)):
+			edited = edits[idx].get("new", "").replace("\n", " ")
+			lines.append(f"\t> edited (version {idx}): {edited}")
+
+	text_content = "\n".join(lines) or "No messages recorded."
+
+	return Response(text_content, mimetype="text/plain", headers={"Content-Disposition": f"attachment; filename=ticket_{guild_id}_{ticket_id}.txt"})
 
 if __name__ == '__main__':
 	app.run()

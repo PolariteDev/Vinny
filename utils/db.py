@@ -70,7 +70,7 @@ def create_guilds_table():
 					guild_id INTEGER PRIMARY KEY,
 					log_channel_id INTEGER DEFAULT NULL,
 					event_log_channel_id INTEGER DEFAULT NULL,
-		   			appeals_channel_id INTEGER DEFAULT NULL,
+					appeals_channel_id INTEGER DEFAULT NULL,
 					nonce_filter BOOLEAN DEFAULT 0,
 					bot_filter BOOLEAN DEFAULT 1,
 					on_message_delete BOOLEAN DEFAULT 1,
@@ -87,7 +87,9 @@ def create_guilds_table():
 					appeals BOOLEAN DEFAULT 0,
 					appeals_message TEXT DEFAULT 'New ban appeal',
 					appeals_website_message TEXT DEFAULT 'Please write in detail why you think you should be unbanned',
-					appeals_poll BOOLEAN DEFAULT 1
+					appeals_poll BOOLEAN DEFAULT 1,
+					tickets BOOLEAN DEFAULT 0,
+					tickets_category_id INTEGER DEFAULT NULL
 				)''')
 
 	c.execute("PRAGMA table_info(guilds)")
@@ -100,7 +102,7 @@ def create_guilds_table():
 		'max_moderations_enabled': ["BOOLEAN", 0], 'max_s1_moderations': ["INTEGER", 1], 'max_s2_moderations': ["INTEGER", 4],
 		'max_s3_moderations': ["INTEGER", 1], 'appeals': ["BOOLEAN", 0], 'appeals_channel_id': ["INTEGER", 0],
 		'appeals_message': ["TEXT", "'New ban appeal'"], 'appeals_website_message': ["TEXT", "'Please write in detail why you think you should be unbanned'"],
-		'appeals_poll': ["BOOLEAN", 1]
+		'appeals_poll': ["BOOLEAN", 1], 'tickets': ["BOOLEAN", 0], 'tickets_category_id': ["INTEGER", 0]
 	}
 
 	for column in new_columns:
@@ -141,9 +143,29 @@ def create_appeals_table():
 	conn.commit()
 	conn.close()
 
+def create_tickets_table():
+	conn, c = db_connect()
+
+	c.execute('''CREATE TABLE IF NOT EXISTS tickets (
+		guild_id INTEGER NOT NULL,
+		ticket_id INTEGER NOT NULL,
+		user_id INTEGER NOT NULL,
+		reason TEXT,
+		channel_id INTEGER,
+		active BOOLEAN DEFAULT 1,
+		closer_id INTEGER,
+		time TEXT,
+		messages TEXT,
+		PRIMARY KEY (guild_id, ticket_id)
+	)''')
+
+	conn.commit()
+	conn.close()
+
 create_guilds_table()
 create_appeals_table()
 create_moderation_table()
+create_tickets_table()
 
 def insert_moderation(guild_id: int, user_id: int, moderator_id: int, moderation_type: str, reason: str, severity: str, time: str, duration: str, conn: sqlite3.Connection, c: sqlite3.Cursor):
 	try:
@@ -221,6 +243,35 @@ def get_moderations_by_guild(guild_id: int, c: sqlite3.Cursor):
 	c.execute("SELECT * FROM moderations WHERE guild_id=?", (guild_id,))
 	moderations = c.fetchall()
 	return moderations
+
+def insert_ticket(guild_id: int, user_id: int, reason: str, time: str, conn: sqlite3.Connection, c: sqlite3.Cursor) -> int:
+	try:
+		# increment the ticket ID per guild
+		c.execute('SELECT MAX(ticket_id) AS max_id FROM tickets WHERE guild_id = ?', (guild_id,))
+		result = c.fetchone()
+		ticket_id = 1 if result[0] is None else result[0] + 1
+
+		c.execute('''INSERT INTO tickets (guild_id, ticket_id, user_id, reason, channel_id, active, closer_id, time, messages)
+					VALUES (?,?,?,?,?,?,?,?,?)''', (guild_id, ticket_id, user_id, reason, 0, True, None, time, ''))
+		conn.commit()
+		return ticket_id
+	except Exception as e:
+		print(f'Error while inserting ticket: {e}')
+
+
+def update_ticket_channel_id(guild_id: int, ticket_id: int, channel_id: int, conn: sqlite3.Connection, c: sqlite3.Cursor):
+	try:
+		c.execute('UPDATE tickets SET channel_id = ? WHERE guild_id = ? AND ticket_id = ?', (channel_id, guild_id, ticket_id))
+		conn.commit()
+	except Exception as e:
+		print(f'Error while updating ticket channel: {e}')
+
+def close_ticket(guild_id: int, ticket_id: int, closer_id: int, conn: sqlite3.Connection, c: sqlite3.Cursor):
+	try:
+		c.execute('UPDATE tickets SET active = ?, closer_id = ? WHERE guild_id = ? AND ticket_id = ?', (False, closer_id, guild_id, ticket_id))
+		conn.commit()
+	except Exception as e:
+		print(f'Error while closing ticket: {e}')
 
 def get_config_value(guild_id: int, key: str, c: sqlite3.Cursor, default: int = 1) -> int:
 	try:

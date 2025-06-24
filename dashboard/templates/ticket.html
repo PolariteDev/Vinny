@@ -1,0 +1,45 @@
+<!-- 
+vinny - discord moderation bot
+Copyright (C) 2024-2025 Polarograph
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+NOTE: If you wanna use my dashboard module/IPC extension without complying with above terms,
+then contact me for inquiries/questions for permission. You will only be able to
+use my commits if you have received permission from me. <0vfx@proton.me>
+-->
+
+{% extends "base.html" %}
+{% block content %}
+<div class="buttons" style="margin-bottom:1em;">
+	<a href="{{ url_for('download_ticket_log',guild_id=guild_id,ticket_id=ticket_id) }}" class="button is-info outlined">
+		<span class="icon"><i class="fas fa-download"></i></span>
+		<span>Download Log (.txt)</span>
+	</a>
+</div>
+<div class="hero container">
+	<article class="message container">
+		<div class="message-header">
+			<p>Ticket #{{ ticket_id }} on {{ guild_name }}</p>
+		</div>
+		<div class="message-body">
+			<i>Ticket opened by {{ user_name }} on {{ time_unix }} UTC</i><br>
+			<i>Reason: {{ reason }}</i>
+			<br><br>
+			{{ ticket_log | safe }}
+		</div>
+		<p><i>deletion 30 days after creation</i></p>
+	</article>
+</div>
+{% endblock %}
