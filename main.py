@@ -36,7 +36,7 @@ class bot(commands.Bot):
 			max_messages=5000,
 			command_prefix="Vinny",
 			allowed_mentions=allowed_mentions,
-			activity=discord.Activity(type=discord.ActivityType.watching, name="over Polarite")
+			activity=discord.Activity(type=discord.ActivityType.watching, name="1,000 members")
 		)
 
 bot = bot()
@@ -50,6 +50,12 @@ intents = discord.Intents.default()
 @bot.event
 async def on_ready():
 	print(f'logged in to {bot.user}')
+	await bot.change_presence(
+		activity=discord.Activity(
+			type=discord.ActivityType.watching,
+			name=f"{len(bot.users):,} members"
+		)
+    )
 	bot.start_time = datetime.datetime.now(datetime.UTC)
 	watcher = Watcher(bot, path='cogs', debug=False)
 	await watcher.start()
