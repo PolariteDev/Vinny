@@ -119,12 +119,12 @@ class utility(commands.Cog):
 			embed = discord.Embed(title="New Ticket Opened", color=0x3452E8, timestamp=datetime.now())
 			embed.add_field(name="By", value=user.mention)
 			embed.add_field(name="Reason", value=f"{reason}")
-			embed.set_footer("To close this ticket, use the /ticket_close command")
+			embed.set_footer("To close this ticket, use the /close_ticket command")
 			await channel.send(content="@everyone", embed=embed, allowed_mentions=AllowedMentions(everyone=True))
 			await interaction.response.send_message(f"Your ticket has been created: {channel.mention}", ephemeral=True)
 
 			# log the ticket creation
-			embed = await embeds.ticket_open(ticket_id, user, channel, reason)
+			embed = await embeds.open_ticket(ticket_id, user, channel, reason)
 			try:
 				log_channel = await self.bot.fetch_channel(log_channel_id)
 				await log_channel.send(embed=embed)
@@ -141,7 +141,7 @@ class utility(commands.Cog):
 
 	@app_commands.command(description="Close the current ticket")
 	@app_commands.checks.has_permissions(moderate_members=True)
-	async def ticket_close(self, interaction: discord.Interaction):
+	async def close_ticket(self, interaction: discord.Interaction):
 		try:
 			guild = interaction.guild
 			channel = interaction.channel
@@ -172,7 +172,7 @@ class utility(commands.Cog):
 			ticket_url = f"[Click me!]({config_data['dashboard']['url']}/dashboard/server/{interaction.guild.id}/ticket/{ticket_id})"
 
 			# log the ticket closure, with the ticket log available on web
-			embed = await embeds.ticket_close(ticket_id, user, closer, ticket_url)
+			embed = await embeds.close_ticket(ticket_id, user, closer, ticket_url)
 			try:
 				log_channel = await self.bot.fetch_channel(log_channel_id)
 				await log_channel.send(embed=embed)

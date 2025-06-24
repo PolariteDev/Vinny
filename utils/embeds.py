@@ -142,14 +142,14 @@ async def member_remove(member: discord.Member):
 	embed.set_thumbnail(url=member.avatar)
 	return embed
 
-async def ticket_open(id: int, user: discord.Member, channel: discord.TextChannel, reason: str):
+async def open_ticket(id: int, user: discord.Member, channel: discord.TextChannel, reason: str):
 	embed = discord.Embed(title=f"Ticket opened (#{id})", color=0x3452E8, timestamp=datetime.datetime.now())
 	embed.add_field(name="Opened By", value=user.mention)
 	embed.add_field(name="Channel", value=channel.mention)
 	embed.add_field(name="Reason", value=f"{reason}")
 	return embed
 
-async def ticket_close(id: int, user: discord.Member, closer: discord.Member, log: str):
+async def close_ticket(id: int, user: discord.Member, closer: discord.Member, log: str):
 	embed = discord.Embed(title=f"Ticket closed (#{id})", color=16729932, timestamp=datetime.datetime.now())
 	embed.add_field(name="Opened By", value=user.mention)
 	embed.add_field(name="Closed By", value=closer.mention)
