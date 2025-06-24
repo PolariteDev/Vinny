@@ -19,7 +19,8 @@ import os
 import asyncio
 from discord.ext import commands
 from pathlib import Path
-from utils import utils
+from cogs.cmds.utility import TicketView
+from utils import db, utils
 from cogwatch import Watcher
 import datetime
 import sys
@@ -38,6 +39,12 @@ class bot(commands.Bot):
 			allowed_mentions=allowed_mentions,
 			activity=discord.Activity(type=discord.ActivityType.watching, name="1,000 members")
 		)
+	async def setup_hook(self) -> None:
+		conn, c = db.db_connect()
+		for view_id, message_id in db.load_all_view_ids(conn, c):
+			view = TicketView(view_id, bot=self)
+			self.add_view(view, message_id=message_id)
+		conn.close()
 
 bot = bot()
 
@@ -55,7 +62,7 @@ async def on_ready():
 			type=discord.ActivityType.watching,
 			name=f"{len(bot.users):,} members"
 		)
-    )
+	)
 	bot.start_time = datetime.datetime.now(datetime.UTC)
 	watcher = Watcher(bot, path='cogs', debug=False)
 	await watcher.start()

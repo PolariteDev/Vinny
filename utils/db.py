@@ -162,10 +162,25 @@ def create_tickets_table():
 	conn.commit()
 	conn.close()
 
+def create_ticket_view_table():
+	conn, c = db_connect()
+
+	c.execute('''CREATE TABLE IF NOT EXISTS ticket_views (
+		guild_id INTEGER NOT NULL,
+		message_id INTEGER NOT NULL,
+		view_id TEXT NOT NULL,
+		reason TEXT NOT NULL,
+		PRIMARY KEY (guild_id, message_id)
+	)''')
+
+	conn.commit()
+	conn.close()
+
 create_guilds_table()
 create_appeals_table()
 create_moderation_table()
 create_tickets_table()
+create_ticket_view_table()
 
 def insert_moderation(guild_id: int, user_id: int, moderator_id: int, moderation_type: str, reason: str, severity: str, time: str, duration: str, conn: sqlite3.Connection, c: sqlite3.Cursor):
 	try:
@@ -258,7 +273,6 @@ def insert_ticket(guild_id: int, user_id: int, reason: str, time: str, conn: sql
 	except Exception as e:
 		print(f'Error while inserting ticket: {e}')
 
-
 def update_ticket_channel_id(guild_id: int, ticket_id: int, channel_id: int, conn: sqlite3.Connection, c: sqlite3.Cursor):
 	try:
 		c.execute('UPDATE tickets SET channel_id = ? WHERE guild_id = ? AND ticket_id = ?', (channel_id, guild_id, ticket_id))
@@ -272,6 +286,35 @@ def close_ticket(guild_id: int, ticket_id: int, closer_id: int, conn: sqlite3.Co
 		conn.commit()
 	except Exception as e:
 		print(f'Error while closing ticket: {e}')
+
+def insert_ticket_view(guild_id: int, message_id: int, view_id: str, reason: str, conn: sqlite3.Connection, c: sqlite3.Cursor):
+	try:
+		c.execute('''INSERT OR REPLACE INTO ticket_views (guild_id, message_id, view_id, reason)
+		VALUES (?, ?, ?, ?)''', (guild_id, message_id, view_id, reason))
+		conn.commit()
+	except Exception as e:
+		print(f"Error while inserting ticket view: {e}")
+
+
+def get_ticket_view_reason(guild_id: int, view_id: int, c: sqlite3.Cursor) -> str | None:
+	try:
+		c.execute('SELECT reason FROM ticket_views WHERE guild_id = ? AND view_id = ?', (guild_id, view_id))
+		result = c.fetchone()
+		return result[0] if result else None
+	except Exception as e:
+		print(f"Error while fetching ticket view reason: {e}")
+		return None
+
+def load_all_view_ids(conn: sqlite3.Connection, c: sqlite3.Cursor) -> list[str]:
+    try:
+        c.execute('SELECT view_id, message_id FROM ticket_views')
+        rows = c.fetchall()
+        view_data = [(row[0], row[1]) for row in rows if row and row[0] is not None and row[1] is not None]
+        print(f"Loaded {len(view_data)} view entries: ", view_data)
+        return view_data
+    except Exception as e:
+        print(f"Error while loading ticket view entries: {e}")
+        return []
 
 def get_config_value(guild_id: int, key: str, c: sqlite3.Cursor, default: int = 1) -> int:
 	try:

@@ -18,20 +18,73 @@ from datetime import datetime
 import json
 from time import time
 import discord
-from discord import app_commands, PermissionOverwrite, AllowedMentions
+from discord.ui import Button, View, Modal, TextInput
+from discord import app_commands, PermissionOverwrite, AllowedMentions, TextStyle
 from discord.ext import commands
 from discord.ext.commands import Bot
 from utils import embeds, utils
 import utils.db as db
 import importlib
 
+class TicketButton(Button):
+	def __init__(self, view_id: str):
+		super().__init__(label="Open a Ticket", emoji="📥", style=discord.ButtonStyle.green)
+		self.custom_id = view_id
+
+	async def callback(self, interaction: discord.Interaction):
+		try:
+			conn, c = db.db_connect()
+			reason = db.get_ticket_view_reason(interaction.guild.id, self.custom_id, c)
+			conn.close()
+
+			if not reason:
+				await interaction.response.send_message("This ticket panel is no longer valid.", ephemeral=True) # ?
+				return
+
+			await utility.create_ticket(utility, reason, interaction)
+		except Exception as e:
+			print(e)
+
+class TicketView(View):
+	def __init__(self, view_id: str, bot: Bot):
+		super().__init__(timeout=None)
+		self.bot = bot
+		self.add_item(TicketButton(view_id))
+
+class TicketPanelModal(Modal, title="Create Ticket Panel"):
+	title_input = TextInput(label="Embed Title", style=TextStyle.short, required=True)
+	desc_input = TextInput(label="Embed Description", style=TextStyle.paragraph, required=True)
+	reason_input = TextInput(label="Ticket Reason", style=TextStyle.short, required=True)
+
+	async def on_submit(self, interaction: discord.Interaction):
+		title = self.title_input.value
+		description = self.desc_input.value
+		reason = self.reason_input.value
+
+		embed = discord.Embed(title=title, description=description, color=0x00863A)
+		embed.set_footer(text="Vinny Tickets", icon_url=interaction.client.user.display_avatar.url)
+		embed.timestamp = datetime.now()
+
+		channel = interaction.channel
+
+		msg = await channel.send(embed=embed, view=TicketView("temp", interaction.client))
+
+		await interaction.response.send_message(f"Ticket panel created sucessfully: {msg.jump_url}", ephemeral=True)
+
+		view_id = f"{interaction.guild.id}:{msg.id}"
+
+		conn, c = db.db_connect()
+		db.insert_ticket_view(interaction.guild.id, msg.id, view_id, reason, conn, c)
+		conn.close()
+
+		view = TicketView(view_id, interaction.client)
+		await msg.edit(view=view)
+
 class utility(commands.Cog):
 	def __init__(self, bot: Bot) -> None:
 		self.bot = bot
 
-	@app_commands.command(description="Open a ticket to server staff")
-	@app_commands.describe(reason="Ticket reason")
-	async def ticket(self, interaction: discord.Interaction, reason: str):
+	async def create_ticket(self, reason: str, interaction: discord.Interaction):
 		try:
 			guild = interaction.guild
 			user = interaction.user
@@ -66,6 +119,7 @@ class utility(commands.Cog):
 			embed = discord.Embed(title="New Ticket Opened", color=0x3452E8, timestamp=datetime.now())
 			embed.add_field(name="By", value=user.mention)
 			embed.add_field(name="Reason", value=f"{reason}")
+			embed.set_footer("To close this ticket, use the /ticket_close command")
 			await channel.send(content="@everyone", embed=embed, allowed_mentions=AllowedMentions(everyone=True))
 			await interaction.response.send_message(f"Your ticket has been created: {channel.mention}", ephemeral=True)
 
@@ -79,6 +133,11 @@ class utility(commands.Cog):
 		except Exception as e:
 			print(f"Error while opening ticket: {e}")
 			await interaction.response.send_message("An error occurred while opening your ticket.", ephemeral=True)
+
+	@app_commands.command(description="Open a ticket to server staff")
+	@app_commands.describe(reason="Ticket reason")
+	async def ticket(self, interaction: discord.Interaction, reason: str):
+		await self.create_ticket(reason=reason, interaction=interaction) # abstracted
 
 	@app_commands.command(description="Close the current ticket")
 	@app_commands.checks.has_permissions(moderate_members=True)
@@ -228,6 +287,11 @@ class utility(commands.Cog):
 		c.execute('UPDATE tickets SET messages = ? WHERE guild_id = ? AND ticket_id = ?', (updated, message.guild.id, ticket_id))
 		conn.commit()
 		conn.close()
+
+	@app_commands.command(description="Create a ticket panel with a button")
+	@app_commands.checks.has_permissions(manage_guild=True)
+	async def ticket_panel(self, interaction: discord.Interaction):
+		await interaction.response.send_modal(TicketPanelModal())
 
 async def setup(bot):
 	importlib.reload(db)
