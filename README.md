@@ -8,6 +8,7 @@ Self-hosted moderation bot
 - Tempban support
 - Event logs
 - Ban appeals
+- Tickets & Ticket Panels
 - Quickmod (right click message -> Apps -> Quickmod)
 - Moderation marking (the ability to mark moderations as active or inactive)
 
@@ -67,6 +68,7 @@ python3 dashboard/dashboard.py # IMPORTANT! You must execute the dashboard from 
 - [Bulma](https://bulma.io/)-based web dashboard
 - Per-server paginated moderations overview
 - Server-toggleable features
+- Detailed ticket logs
 
 ### TODO:
 - None (for now)
