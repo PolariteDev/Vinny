@@ -310,7 +310,7 @@ def load_all_view_ids(conn: sqlite3.Connection, c: sqlite3.Cursor) -> list[str]:
         c.execute('SELECT view_id, message_id FROM ticket_views')
         rows = c.fetchall()
         view_data = [(row[0], row[1]) for row in rows if row and row[0] is not None and row[1] is not None]
-        print(f"Loaded {len(view_data)} view entries: ", view_data)
+        print(f"Loaded {len(view_data)} view entries")
         return view_data
     except Exception as e:
         print(f"Error while loading ticket view entries: {e}")
