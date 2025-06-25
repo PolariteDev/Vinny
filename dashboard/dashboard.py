@@ -462,14 +462,16 @@ async def view_ticket(guild_id, ticket_id):
 				"timestamp": time_unix,
 				"author_id": vinny_id,
 				"content": "Ticket content deleted as it was older than 30 days.",
-				"deleted": True
+				"deleted": False,
+				"system": True
 			}]
 		else:
 			msgs = json.loads(messages_json) if messages_json else [{
 				"timestamp": time_unix,
 				"author_id": vinny_id,
 				"content": "No messages recorded.",
-				"deleted": True
+				"deleted": False,
+				"system": True
 			}]
 	except json.JSONDecodeError:
 		msgs = []
@@ -495,6 +497,7 @@ async def view_ticket(guild_id, ticket_id):
 			versions.append(edits[idx]["new"])
 
 		danger_class = " has-text-danger" if m.get("deleted") else ""
+		italic_style = "font-style: italic;" if m.get("system") else ""
 
 		if author != last_author or (last_ts and ts - last_ts > 300):
 			if group_open:
@@ -522,7 +525,7 @@ async def view_ticket(guild_id, ticket_id):
 				escaped += ' <span class="has-text-grey" style="font-size: 0.75em;">(edited)</span>'
 			parts.append(f'<span style="opacity:{opacity};">{escaped}</span>')
 		joined = '<br>'.join(parts)
-		ticket_log += f'<p style="margin:4px 0 0 0;" class="{danger_class}">{joined}</p>'
+		ticket_log += f'<p style="margin:4px 0 0 0;{italic_style}" class="{danger_class}">{joined}</p>'
 
 		last_author = author
 		last_ts = ts
