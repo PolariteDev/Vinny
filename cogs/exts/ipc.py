@@ -21,7 +21,7 @@
 from typing import Dict
 import datetime
 import discord
-from discord import Emoji, app_commands
+from discord import app_commands
 from discord.ext import commands, ipc
 from discord.ext.ipc.server import Server
 from discord.ext.ipc.objects import ClientPayload

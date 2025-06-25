@@ -20,11 +20,6 @@ import time
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import Bot
-from typing import Literal
-import discord.ext
-import discord.ext.commands
-import discord.ext.commands.view
 import schedule
 import asyncio
 from dashboard.dashboard import appeal

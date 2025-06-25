@@ -17,14 +17,8 @@
 import discord
 from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import Bot
-from typing import Literal
-import discord.ext
-import discord.ext.commands
-import discord.ext.commands.view
 from utils import db, utils, embeds
 from cogs.cmds import moderation
-import datetime
 import time
 import traceback
 import importlib

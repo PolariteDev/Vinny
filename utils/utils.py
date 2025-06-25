@@ -18,7 +18,6 @@ import re
 import datetime
 import discord
 import sys
-from typing import Union
 
 if sys.version_info >= (3, 11): # compat with older python (you'll need to install tomli from pip though)
 	import tomllib

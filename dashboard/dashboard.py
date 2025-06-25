@@ -19,15 +19,10 @@
 # use my commits if you have received permission from me. <0vfx@proton.me>
 
 import datetime
-from functools import wraps
-from importlib.metadata import requires
-from pydoc import describe
 import time
-from xmlrpc.client import boolean
 from flask import Flask, Response, render_template, redirect, render_template_string, request, url_for, abort, current_app
-from flaskcord import DiscordOAuth2Session, requires_authorization, Unauthorized, models
+from flaskcord import DiscordOAuth2Session, requires_authorization, Unauthorized
 from discord.ext.ipc import Client
-from discord import Guild
 import json
 import html
 import sys

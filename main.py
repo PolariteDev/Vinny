@@ -23,7 +23,6 @@ from cogs.cmds.utility import TicketView
 from utils import db, utils
 from cogwatch import Watcher
 import datetime
-import sys
 
 base_dir = Path(__file__).resolve().parent
 

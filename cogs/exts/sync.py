@@ -1,5 +1,4 @@
 # save anything to this file to trigger a sync, recommended after every update (eg: printf "\n" >> sync.py)
-from discord import app_commands
 from discord.ext import commands
 
 class sync(commands.Cog):

@@ -15,19 +15,11 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import discord
-from discord import app_commands
 from discord.ext import commands
-from discord.ext.commands import Bot
-from typing import Literal
-import discord.ext
-import discord.ext.commands
-import discord.ext.commands.view
 import schedule
 import asyncio
 from utils import db, utils, embeds
 import datetime
-import time
-import traceback
 import importlib
 message_delete_embeds = {} # this is so we can send one message with all the embeds
 
