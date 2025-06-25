@@ -465,7 +465,12 @@ async def view_ticket(guild_id, ticket_id):
 				"deleted": True
 			}]
 		else:
-			msgs = json.loads(messages_json) if messages_json else []
+			msgs = json.loads(messages_json) if messages_json else [{
+				"timestamp": time_unix,
+				"author_id": vinny_id,
+				"content": "No messages recorded.",
+				"deleted": True
+			}]
 	except json.JSONDecodeError:
 		msgs = []
 
