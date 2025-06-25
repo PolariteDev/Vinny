@@ -105,7 +105,13 @@ class utility(commands.Cog):
 			for role in mod_roles:
 				overwrites[role] = PermissionOverwrite(read_messages=True, send_messages=True)
 
-			channel = await guild.create_text_channel(name=f"ticket-{ticket_id}", overwrites=overwrites, reason=f"Ticket #{ticket_id} opened by {user} for: {reason}")
+			tickets_category_id = db.get_config_value(guild.id, "tickets_category_id", c, 0)
+
+			if tickets_category_id != 0:
+				tickets_category = discord.utils.get(guild.categories, id=tickets_category_id)
+				channel = await guild.create_text_channel(name=f"ticket-{ticket_id}", overwrites=overwrites, reason=f"Ticket #{ticket_id} opened by {user} for: {reason}", category=tickets_category)
+			else:
+				channel = await guild.create_text_channel(name=f"ticket-{ticket_id}", overwrites=overwrites, reason=f"Ticket #{ticket_id} opened by {user} for: {reason}")
 
 			conn, c = db.db_connect()
 
@@ -137,7 +143,13 @@ class utility(commands.Cog):
 	@app_commands.command(description="Open a ticket to server staff")
 	@app_commands.describe(reason="Ticket reason")
 	async def ticket(self, interaction: discord.Interaction, reason: str):
-		await self.create_ticket(reason=reason, interaction=interaction) # abstracted
+		conn, c = db.db_connect()
+		tickets = db.get_config_value(interaction.guild.id, "tickets", c, False)
+		conn.close()
+		if tickets:
+			await self.create_ticket(reason=reason, interaction=interaction) # abstracted
+		else:
+			await interaction.response.send_message("This server does not have the /ticket command enabled.", ephemeral=True)
 
 	@app_commands.command(description="Close the current ticket")
 	@app_commands.checks.has_permissions(moderate_members=True)

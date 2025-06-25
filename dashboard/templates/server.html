@@ -346,6 +346,50 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 							</div>
 						</div>
 					</div>
+
+					<div class="box mt-5">
+						<h2 class="title is-5 has-text-info mb-4">
+							<span class="icon"><i class="fas fa-screwdriver-wrench"></i></span>
+							Utility Settings
+						</h2>
+						
+						<div class="field">
+							<label class="label" data-tooltip="Allow users to open tickets using /ticket <reason>">
+								<code>/ticket</code> Command
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control">
+								<div class="select is-fullwidth">
+									<select id="tickets" name="tickets">
+										<option value="0">Disabled</option>
+										<option value="1">Enabled</option>
+									</select>
+								</div>
+							</div>
+						</div>
+
+						<div class="field">
+							<label class="label" data-tooltip="Under which category tickets should be created">
+								Tickets Category
+								<span class="icon has-text-info">
+									<i class="fas fa-info-circle"></i>
+								</span>
+							</label>
+							<div class="control has-icons-left">
+								<div class="select is-fullwidth">
+									<select id="tickets_category" name="tickets_category">
+										<option value="0">None</option>
+										{% for id, name in guild_categories.items() %}
+											<option value="{{ id }}">{{ name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<span class="icon is-left"><i class="fas fa-ticket"></i></span>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -368,7 +412,9 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 			<input type="hidden" id="db_appeals_channel" name="db_appeals_channel" value="{{ db_values['appeals_channel_id'] }}">
 			<input type="hidden" id="db_appeals_message" name="db_appeals_message" value="{{ db_values['appeals_message'] }}">
 			<input type="hidden" id="db_appeals_website_message" name="db_appeals_website_message" value="{{ db_values['appeals_website_message'] }}">
-			<input type="hidden" id="db_appeals_poll" name="db_appeals_website_message" value="{{ db_values['appeals_poll'] }}">
+			<input type="hidden" id="db_appeals_poll" name="db_appeals_poll" value="{{ db_values['appeals_poll'] }}">
+			<input type="hidden" id="db_tickets" name="db_tickets" value="{{ db_values['tickets'] }}">
+			<input type="hidden" id="db_tickets_category" name="db_tickets_category" value="{{ db_values['tickets_category_id'] }}">
 
 			<div class="save-notification-container">
 				<div class="save-notification box is-warning has-text-weight-bold hidden" id="unsaved-notif">
@@ -482,7 +528,9 @@ use my commits if you have received permission from me. <0vfx@proton.me>
 			'appeals_channel_id': 'appeals_channel',
 			'appeals_message': 'appeals_message',
 			'appeals_website_message': 'appeals_website_message',
-			'appeals_poll': 'appeals_poll'
+			'appeals_poll': 'appeals_poll',
+			'tickets': 'tickets',
+			'tickets_category_id': 'tickets_category'
 		};
 	
 		Object.entries(elementMap).forEach(([dbKey, elementId]) => {

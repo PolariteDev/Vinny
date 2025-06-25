@@ -70,6 +70,16 @@ class Routes(commands.Cog):
 			return {}
 
 	@Server.route()
+	async def get_guild_categories(self, data):
+		guild_id = data['guild_id']
+		guild = self.bot.get_guild(guild_id)
+		if guild is not None:
+			categories = {category.id: category.name for category in guild.categories}
+			return categories
+		else:
+			return {}
+
+	@Server.route()
 	async def get_bot_id(self, data):
 		return(str(self.bot.user.id))
 

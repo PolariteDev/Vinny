@@ -175,6 +175,7 @@ async def server_view(guild_id):
 		return redirect(f'https://discord.com/oauth2/authorize?&client_id={app.config["DISCORD_CLIENT_ID"]}&scope=bot&permissions=8&guild_id={guild_id}&response_type=code&redirect_uri={app.config["DISCORD_REDIRECT_URI"]}')
 
 	guild_channels = await ipc.request("get_guild_channels", guild_id=guild_id)
+	guild_categories = await ipc.request("get_guild_categories", guild_id=guild_id)
 	conn, c = db.db_connect()
 	c.execute("INSERT OR IGNORE INTO guilds (guild_id) VALUES (?)", (guild_id,))
 	conn.commit()
@@ -199,12 +200,14 @@ async def server_view(guild_id):
 			"appeals_channel_id": request.form.get("appeals_channel"),
 			"appeals_message": request.form.get("appeals_message"),
 			"appeals_website_message": request.form.get("appeals_website_message"),
-			"appeals_poll": int(request.form.get("appeals_poll", 1))
+			"appeals_poll": int(request.form.get("appeals_poll", 1)),
+			"tickets": int(request.form.get("tickets", 0)),
+			"tickets_category_id": request.form.get("tickets_category")
 		}
 		for form in form_fields:
 			if form_fields[form] is None:
 				continue
-			elif form_fields[form] == 0 or form_fields[form] == "0" or form_fields[form] == 1 or form_fields[form] in guild_channels.response or form in ('max_s1_moderations', 'max_s2_moderations', 'max_s3_moderations', 'appeals_message', 'appeals_website_message'):
+			elif form_fields[form] == 0 or form_fields[form] == "0" or form_fields[form] == 1 or form_fields[form] in guild_channels.response or form_fields[form] in guild_categories.response or form in ('max_s1_moderations', 'max_s2_moderations', 'max_s3_moderations', 'appeals_message', 'appeals_website_message'):
 				db.set_config_value(guild_id, form, form_fields[form], conn, c)
 		db_values = {}
 		defaults = {
@@ -227,12 +230,14 @@ async def server_view(guild_id):
 			"appeals_channel_id": 0,
 			"appeals_message": "New ban appeal",
 			"appeals_website_message": "Please write in detail why you think you should be unbanned",
-			"appeals_poll": 1
+			"appeals_poll": 1,
+			"tickets": 0,
+			"tickets_category_id": 0
 		}
 		for key in defaults:
 			db_values[f"{key}"] = db.get_config_value(guild_id, key, c, defaults[f"{key}"])
 		conn.close()
-		return render_template("server.html", guild=guild_obj, user=user, guild_channels=guild_channels.response, saved=True, db_values=db_values, title=f"{guild_name}", description=f"{guild_name} configuration panel", url=f"{config_data['dashboard']['url']}{url_for('server_view', guild_id=guild_id)}")
+		return render_template("server.html", guild=guild_obj, user=user, guild_channels=guild_channels.response, saved=True, db_values=db_values, title=f"{guild_name}", description=f"{guild_name} configuration panel", url=f"{config_data['dashboard']['url']}{url_for('server_view', guild_id=guild_id)}", guild_categories=guild_categories.response)
 	else:
 		db_values = {}
 		defaults = {
@@ -255,12 +260,14 @@ async def server_view(guild_id):
 			"appeals_channel_id": 0,
 			"appeals_message": "New ban appeal",
 			"appeals_website_message": "Please write in detail why you think you should be unbanned",
-			"appeals_poll": 1
+			"appeals_poll": 1,
+			"tickets": 0,
+			"tickets_category_id": 0
 		}
 		for key in defaults:
 			db_values[f"{key}"] = db.get_config_value(guild_id, key, c, defaults[f"{key}"])
 		conn.close()
-		return render_template("server.html", guild=guild_obj, user=user, guild_channels=guild_channels.response, saved=False, db_values=db_values, title=f"{guild_name}", description=f"{guild_name} configuration panel", url=f"{config_data['dashboard']['url']}{url_for('server_view', guild_id=guild_id)}")
+		return render_template("server.html", guild=guild_obj, user=user, guild_channels=guild_channels.response, saved=False, db_values=db_values, title=f"{guild_name}", description=f"{guild_name} configuration panel", url=f"{config_data['dashboard']['url']}{url_for('server_view', guild_id=guild_id)}", guild_categories=guild_categories.response)
 
 @app.route("/dashboard/server/<int:guild_id>/moderations/")
 async def moderations_redirect(guild_id):
